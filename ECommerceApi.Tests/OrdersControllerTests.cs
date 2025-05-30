@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using EcommerceApi.Controllers;
+﻿using EcommerceApi.Controllers;
 using EcommerceApi.Models;
 using EcommerceApi.services;
 using Microsoft.AspNetCore.Mvc;
@@ -39,18 +34,44 @@ namespace ECommerceApi.Tests
             Assert.Single(resultOrders);
         }
 
-        [Fact]
-        public async Task GetById_Existing_ReturnsOrder()
+        [Theory]
+        [InlineData(1)]
+        [InlineData(2)]
+        [InlineData(-7)]
+        public async Task GetById_ShoudReturnOrder_WhenValidIdIsProvided(int orderId)
         {
-           
-            var order = new Order { Id = 1, CustomerId = 1 };
-            _orderServiceMock.Setup(s => s.GetOrderByIdAsync(1)).ReturnsAsync(order);
 
-            var result = await _ordersController.GetById(1);
+            var orders = new List<Order>
+            {
+                new Order
+                {
+                    Id = 1,
+                    CustomerId = 1,
+                },
+                new Order
+                {
+                    Id = 2,
+                    CustomerId = 2,
+                },
+            };
 
-            var okResult = Assert.IsType<OkObjectResult>(result);
-            var returnedOrder = Assert.IsType<Order>(okResult.Value);
-            Assert.Equal(1, returnedOrder.Id);
+            var matchedOrder = orders.FirstOrDefault(o => o.Id == orderId);
+
+            _orderServiceMock.Setup(s => s.GetOrderByIdAsync(orderId)).ReturnsAsync(matchedOrder);
+
+            var result = await _ordersController.GetById(orderId);
+
+            // Assert
+            if (matchedOrder != null)
+            {
+                var okResult = Assert.IsType<OkObjectResult>(result);
+                var returnedOrder = Assert.IsType<Order>(okResult.Value);
+                Assert.Equal(orderId, returnedOrder.Id);
+            }
+            else
+            {
+                Assert.IsType<NotFoundResult>(result);
+            }
         }
 
         [Fact]
