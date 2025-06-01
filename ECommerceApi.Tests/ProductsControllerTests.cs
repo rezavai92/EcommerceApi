@@ -29,6 +29,7 @@ namespace ECommerceApi.Tests
 
             var okResult = Assert.IsType<OkObjectResult>(result);
             var returnProducts = Assert.IsAssignableFrom<IEnumerable<Product>>(okResult.Value);
+
             Assert.Equal(2, ((List<Product>)returnProducts).Count);
         }
 
@@ -42,6 +43,7 @@ namespace ECommerceApi.Tests
 
             var okResult = Assert.IsType<OkObjectResult>(result);
             var returnProduct = Assert.IsType<Product>(okResult.Value);
+
             Assert.Equal(1, returnProduct.Id);
         }
 
@@ -53,6 +55,29 @@ namespace ECommerceApi.Tests
             var result = await _controller.GetById(99);
 
             Assert.IsType<NotFoundResult>(result);
+        }
+
+        [Fact]
+        public async Task AddProduct_ValidProduct_InvokesServiceAndReturnsCreated()
+        {
+            var productToAdd = new Product { Id = 3, Name = "Tablet", Price = 400 };
+            Product? capturedProduct = null;
+
+            _mockService.Setup(s => s.AddProductAsync(It.IsAny<Product>()))
+                        .Callback<Product>(p => capturedProduct = p)
+                        .Returns(Task.CompletedTask);
+
+            var result = await _controller.Add(productToAdd);
+
+            _mockService.Verify(s => s.AddProductAsync(It.IsAny<Product>()), Times.Once);
+
+            var createdAtResult = Assert.IsType<CreatedAtActionResult>(result);
+            
+            Assert.IsType<Product>(createdAtResult.Value);
+
+            // Verify callback captured correct product
+            Assert.Equal(productToAdd.Id, capturedProduct?.Id);
+            Assert.Equal(productToAdd.Name, capturedProduct?.Name);
         }
 
     }

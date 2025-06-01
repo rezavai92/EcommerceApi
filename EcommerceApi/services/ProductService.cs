@@ -21,5 +21,11 @@ namespace EcommerceApi.services
             return await Task.FromResult(product);
         }
 
+        public async Task AddProductAsync(Product product)
+        {
+            _products.Add(product);
+            await Task.CompletedTask;
+        }
+
     }
 }

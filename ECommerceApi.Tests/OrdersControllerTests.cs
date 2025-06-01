@@ -72,6 +72,9 @@ namespace ECommerceApi.Tests
             {
                 Assert.IsType<NotFoundResult>(result);
             }
+
+            _orderServiceMock.Verify(x=>x.GetOrderByIdAsync(orderId),Times.Once);
+
         }
 
         [Fact]
