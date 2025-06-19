@@ -30,7 +30,7 @@ namespace ECommerceApi.Tests
             var okResult = Assert.IsType<OkObjectResult>(result);
             var returnProducts = Assert.IsAssignableFrom<IEnumerable<Product>>(okResult.Value);
 
-            Assert.Equal(2, ((List<Product>)returnProducts).Count);
+            Assert.Equal(3, ((List<Product>)returnProducts).Count);
         }
 
         [Fact]
